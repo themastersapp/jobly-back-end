@@ -3,6 +3,9 @@
 # Jobly
 actually its amazing idea because it solves the problem of hard searching for jobs and contacting the target company and send the cv to the HR, we are third party company all what you have to do is enter to our web application and apply for job by using "jobly" it will make the process of finsing your dream job so easy , only by searching of the job title you want and putting the location or the country you are in.
 
+# Schema Diagram for the project
+![](https://i.im.ge/2021/08/28/QlIkIy.png)
+
 # Cooperation Plan
 ## What are the key strengths of each person on the team?
 all of us have workunder pressure strenght point , and all of us have the ambition to an amazing project
