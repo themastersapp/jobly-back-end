@@ -42,10 +42,10 @@ function Jobhandler(req, res) {
 }
 
 
-function bookmarksHandler(req, res) {
+async function bookmarksHandler  (req, res) {
     // console.log('body', req.body);
     let newBookmark = new Bookmark({ title: req.body.title, company_name: req.body.company_name, description: req.body.description, via: req.body.via, post_date: req.body.post_date, bookmark: req.body.bookmark })
-    newBookmark.save();
+    await newBookmark.save();
 
     Bookmark.find({}, (error, bookmarks) => {
         if (error) {
