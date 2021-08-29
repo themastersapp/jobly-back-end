@@ -109,7 +109,7 @@ async function addApplicationsHandler(req, res) {
 }
 
 async function putApplicationsHandler(req, res) {
-
+        // for whatwever
     console.log('dwdwddw', req.body)
     await Application.findOneAndUpdate({ _id: req.body._id }, { active: req.body.active }, { new: true }, (error) => {
         if (error) {
