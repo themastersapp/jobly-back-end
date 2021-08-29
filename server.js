@@ -6,6 +6,7 @@ require('dotenv').config();
 const server = express();
 server.use(cors());
 const PORT = process.env.PORT;
+const mongoLink = process.env.MONGO_LINK;
 let Data = require('./data.json');
 server.use(express.json());
 const mongoose = require('mongoose');
@@ -14,7 +15,7 @@ const mongoose = require('mongoose');
 main().catch(err => console.log(err));
 
 async function main() {
-    await mongoose.connect('mongodb://localhost:27017/Jobs');
+    await mongoose.connect(mongoLink);
 }
 
 
@@ -29,8 +30,8 @@ server.listen(PORT, () => {
 server.get('/jobresults', Jobhandler);
 server.post('/jobbookmarks', bookmarksHandler);
 server.delete('/jobbookmarks/:id', bookmarksRemoveHandler);
-
 server.post('/applications', addApplicationsHandler);
+server.put('/applications', putApplicationsHandler);
 
 
 //Handlers
@@ -93,9 +94,10 @@ async function addApplicationsHandler(req, res) {
         userName: req.body.userName,
         email: req.body.email,
         userPhone: req.body.userPhone,
-        adress: req.body.adress,
+        address: req.body.address,
         major: req.body.major,
         bio: req.body.bio,
+        active: true,
     })
     Application.find({ email: req.body.email }, (error, applications) => {
         if (error) {
@@ -104,6 +106,27 @@ async function addApplicationsHandler(req, res) {
             res.send(applications);
         }
     });
+}
+
+async function putApplicationsHandler(req, res) {
+
+    console.log('dwdwddw', req.body)
+    await Application.findOneAndUpdate({ _id: req.body._id }, { active: req.body.active }, { new: true }, (error) => {
+        if (error) {
+            console.log('error in saving applications');
+        } else {
+            Application.find({ email: req.body.email }, (error, applications) => {
+                if (error) {
+                    console.log('error in saving applications');
+                } else {
+                    console.log('1w2w2w2',applications)
+                    res.send(applications);
+                }
+            });
+        }
+    });
+
+
 }
 
 
@@ -124,9 +147,10 @@ const applicationSchema = new mongoose.Schema({
     userName: String,
     email: String,
     userPhone: Number,
-    adress: String,
+    address: String,
     major: String,
     bio: String,
+    active: Boolean,
 });
 
 
@@ -155,3 +179,5 @@ function seedDB() {
     // await bookMarkinit.save();
 }
 // seedDB();
+
+
