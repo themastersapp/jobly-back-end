@@ -30,24 +30,27 @@ server.get('/jobresults', Jobhandler);
 server.post('/jobbookmarks', bookmarksHandler);
 server.delete('/jobbookmarks/:id', bookmarksRemoveHandler);
 
+server.post('/applications', addApplicationsHandler);
+
 
 //Handlers
 function Jobhandler(req, res) {
     let Searchedqueries = req.query;
     // console.log(Searchedqueries);
     // console.log(Data.jobs_results[0]);
+
     res.send(Data.jobs_results.map(item => {
         return new JobHandler(item.title, item.company_name, item.description, item.via, item.detected_extensions.posted_at)
     }))
 }
 
 
-async function bookmarksHandler  (req, res) {
-    // console.log('body', req.body);
-    let newBookmark = new Bookmark({ title: req.body.title, company_name: req.body.company_name, description: req.body.description, via: req.body.via, post_date: req.body.post_date, bookmark: req.body.bookmark })
+async function bookmarksHandler(req, res) {
+    console.log('body', req.body);
+    let newBookmark = new Bookmark({ user: req.body.user, title: req.body.bookmarked.title, company_name: req.body.bookmarked.company_name, description: req.body.bookmarked.description, via: req.body.bookmarked.via, post_date: req.body.bookmarked.post_date, bookmark: req.body.bookmarked.bookmark })
     await newBookmark.save();
 
-    Bookmark.find({}, (error, bookmarks) => {
+    Bookmark.find({ user: req.body.user }, (error, bookmarks) => {
         if (error) {
             console.log('error in finding bookmarks');
         } else {
@@ -60,8 +63,8 @@ async function bookmarksHandler  (req, res) {
 function bookmarksRemoveHandler(req, res) {
     console.log('body', req.params);
 
-    Bookmark.deleteOne({_id:req.params.id}, (error, deletedBookmark) => {
-        if(error){
+    Bookmark.deleteOne({ _id: req.params.id }, (error, deletedBookmark) => {
+        if (error) {
             console.log('error in deleting bookmark');
         } else {
             Bookmark.find({}, (error, bookmarks) => {
@@ -76,12 +79,38 @@ function bookmarksRemoveHandler(req, res) {
 }
 
 
-
+async function addApplicationsHandler(req, res) {
+    // let newApplication = new Application({
+    // userName: req.body.username,
+    // email: req.body.email,
+    // userPhone: req.body.userPhone,
+    // adress: req.body.adress,
+    // major: req.body.major,
+    // bio: req.body.bio,
+    // })
+    await Application.create({
+        jobTitle: req.body.jobTitle,
+        userName: req.body.userName,
+        email: req.body.email,
+        userPhone: req.body.userPhone,
+        adress: req.body.adress,
+        major: req.body.major,
+        bio: req.body.bio,
+    })
+    Application.find({ email: req.body.email }, (error, applications) => {
+        if (error) {
+            console.log('error in saving applications');
+        } else {
+            res.send(applications);
+        }
+    });
+}
 
 
 
 //Schemas
 const bookmarkSchema = new mongoose.Schema({
+    user: String,
     title: String,
     company_name: String,
     description: String,
@@ -90,9 +119,21 @@ const bookmarkSchema = new mongoose.Schema({
     bookmark: Boolean,
 });
 
+const applicationSchema = new mongoose.Schema({
+    jobTitle: String,
+    userName: String,
+    email: String,
+    userPhone: Number,
+    adress: String,
+    major: String,
+    bio: String,
+});
+
+
 //Models
 const Bookmark = mongoose.model('Bookmark', bookmarkSchema);
 
+const Application = mongoose.model('Application', applicationSchema);
 
 //Class Constructor
 class JobHandler {
@@ -106,10 +147,11 @@ class JobHandler {
     }
 }
 
+
 //Seeding
 function seedDB() {
     let bookMarkinit = new Bookmark({ title: 'Init Title', company_name: 'Init Company', description: 'Init Des', via: 'Init Via', post_date: 'Init Post', bookmark: true })
 
-    bookMarkinit.save();
+    // await bookMarkinit.save();
 }
 // seedDB();
