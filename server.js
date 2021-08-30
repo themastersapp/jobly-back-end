@@ -10,6 +10,7 @@ const mongoLink = process.env.MONGO_LINK;
 let Data = require('./data.json');
 server.use(express.json());
 const mongoose = require('mongoose');
+const { query } = require('express');
 
 
 main().catch(err => console.log(err));
@@ -33,7 +34,8 @@ server.delete('/jobbookmarks/:id', bookmarksRemoveHandler);
 server.post('/applications', addApplicationsHandler);
 server.put('/applications', putApplicationsHandler);
 
-
+server.post('/profileForm',insertProfileDAta)
+server.get('/checkdata',checkData)
 //Handlers
 function Jobhandler(req, res) {
     let Searchedqueries = req.query;
@@ -125,10 +127,51 @@ async function putApplicationsHandler(req, res) {
             });
         }
     });
-
-
 }
 
+async function insertProfileDAta(request,response){
+    await Profile.create(request.body)
+
+    Profile.find({user:request.body.user},function(error,data){
+        if(error){
+            console.log(error);
+        }else{
+            response.send(data)
+        }
+    })
+}
+
+async function checkData(request,response){
+    let email=request.query.email
+    console.log(email);
+    let reslutObj={}
+    Application.find({ email:email },(error, applications) => {
+        if (error) {
+            console.log('error in saving applications');
+        } else {
+            reslutObj[Application]=applications
+        }
+    });
+
+    Bookmark.find({ user: email }, (error, bookmarks) => {
+        if (error) {
+            console.log('error in finding bookmarks');
+        } else {
+            reslutObj['bookmarks']=bookmarks
+        }
+    });
+
+    Profile.find({ user: email }, (error, Profiles) => {
+        if (error) {
+            console.log('error in finding bookmarks');
+        } else {
+            reslutObj['Profile']=Profiles
+        }
+    });
+    console.log(JSON.stringify(reslutObj));
+    response.send(JSON.stringify(reslutObj));
+
+}
 
 
 //Schemas
@@ -153,12 +196,21 @@ const applicationSchema = new mongoose.Schema({
     active: Boolean,
 });
 
-
+const profileSchema=new mongoose.Schema({
+    phoneNumber:Number,
+    address:String,
+    major:String,
+    skills:String,
+    experience:String,
+    bio:String,
+    user:String
+})
 //Models
 const Bookmark = mongoose.model('Bookmark', bookmarkSchema);
 
 const Application = mongoose.model('Application', applicationSchema);
 
+const Profile=mongoose.model('Profile',profileSchema)
 //Class Constructor
 class JobHandler {
     constructor(title, company_name, description, via, post_date, bookmark) {
