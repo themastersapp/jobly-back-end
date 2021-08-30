@@ -35,7 +35,12 @@ server.post('/applications', addApplicationsHandler);
 server.put('/applications', putApplicationsHandler);
 
 server.post('/profileForm',insertProfileDAta)
-server.get('/checkdata',checkData)
+server.get('/retrieveApplications',retrieveApplications)
+server.get('/retrieveBookmarks',retrieveBookmarks)
+server.get('/retrieveProfile',retrieveProfile)
+server.put('/retrieveProfile',retrieveUpdatedProfile)
+
+
 //Handlers
 function Jobhandler(req, res) {
     let Searchedqueries = req.query;
@@ -121,7 +126,7 @@ async function putApplicationsHandler(req, res) {
                 if (error) {
                     console.log('error in saving applications');
                 } else {
-                    console.log('1w2w2w2',applications)
+                    // console.log('1w2w2w2',applications)
                     res.send(applications);
                 }
             });
@@ -141,37 +146,69 @@ async function insertProfileDAta(request,response){
     })
 }
 
-async function checkData(request,response){
+async function retrieveApplications(request,response){
     let email=request.query.email
     console.log(email);
-    let reslutObj={}
     Application.find({ email:email },(error, applications) => {
         if (error) {
             console.log('error in saving applications');
         } else {
-            reslutObj[Application]=applications
-        }
+            // console.log(applications);
+            response.send(applications)
+                }
     });
 
-    Bookmark.find({ user: email }, (error, bookmarks) => {
-        if (error) {
-            console.log('error in finding bookmarks');
-        } else {
-            reslutObj['bookmarks']=bookmarks
-        }
-    });
-
-    Profile.find({ user: email }, (error, Profiles) => {
-        if (error) {
-            console.log('error in finding bookmarks');
-        } else {
-            reslutObj['Profile']=Profiles
-        }
-    });
-    console.log(JSON.stringify(reslutObj));
-    response.send(JSON.stringify(reslutObj));
 
 }
+async function retrieveBookmarks(request,response){
+    let email=request.query.email
+    console.log(email);
+    Bookmark.find({ user:email },(error, bookMarks) => {
+        if (error) {
+            console.log('error in saving applications');
+        } else {
+            // console.log(bookMarks);
+            response.send(bookMarks);
+            }
+    });
+
+
+}
+async function retrieveProfile(request,response){
+    let email=request.query.email
+    console.log(email);
+    Profile.find({ user:email },(error, profileData) => {
+        if (error) {
+            console.log('error in saving applications');
+        } else {
+            // console.log(profileData);
+            response.send(profileData);
+            }
+    });
+
+
+}
+
+async function retrieveUpdatedProfile(req, res) {
+
+// console.log('req.body', req.body)
+// console.log('req.body.user', req.body.user)
+
+await Profile.findOneAndUpdate({ user: req.body.user },req.body, { new: true }, (error) => {
+    
+        Profile.find({ user: req.body.user }, (error, retriveProfileUpdate) => {
+            
+                console.log('retriveProfileUpdate',retriveProfileUpdate)
+                res.send(retriveProfileUpdate);
+            
+        });
+    
+});
+}
+
+
+
+
 
 
 //Schemas
