@@ -7,7 +7,6 @@ const server = express();
 server.use(cors());
 const PORT = process.env.PORT;
 const mongoLink = process.env.MONGO_LINK;
-let Data = require('./data.json');
 server.use(express.json());
 const mongoose = require('mongoose');
 const { query } = require('express');
@@ -42,12 +41,13 @@ server.put('/retrieveProfile',retrieveUpdatedProfile)
 
 
 //Handlers
-function Jobhandler(req, res) {
+async function Jobhandler(req, res) {
     let Searchedqueries = req.query;
+    let JobsData= await axios.get(`https://serpapi.com/search?engine=google_jobs&q=${req.query.jobtitle}&location=${req.query.location}&api_key=${process.env.API_KEY}`)
     // console.log(Searchedqueries);
     // console.log(Data.jobs_results[0]);
 
-    res.send(Data.jobs_results.map(item => {
+    res.send(JobsData.data.jobs_results.map(item => {
         return new JobHandler(item.title, item.company_name, item.description, item.via, item.detected_extensions.posted_at)
     }))
 }
